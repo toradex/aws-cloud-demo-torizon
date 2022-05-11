@@ -1,0 +1,119 @@
+From f7665821df8ee318a155ebf928ebbb58e72d5b15 Mon Sep 17 00:00:00 2001
+From: Feng Guo <feng.guo@nxp.com>
+Date: Thu, 17 Jun 2021 22:55:09 +0800
+Subject: [PATCH 1/2] Add support for depthwise conv2d and add pad to pool2d
+
+Signed-off-by: Feng Guo <feng.guo@nxp.com>
+---
+ include/tim/vx/ops/conv2d.h | 11 ++++++++++-
+ include/tim/vx/ops/pool2d.h |  9 ++++++++-
+ src/tim/vx/ops/conv2d.cc    | 14 +++++++++++++-
+ src/tim/vx/ops/pool2d.cc    | 15 ++++++++++++++-
+ 4 files changed, 45 insertions(+), 4 deletions(-)
+
+diff --git a/include/tim/vx/ops/conv2d.h b/include/tim/vx/ops/conv2d.h
+index 961a220..821b18d 100644
+--- a/include/tim/vx/ops/conv2d.h
++++ b/include/tim/vx/ops/conv2d.h
+@@ -47,6 +47,15 @@ class Conv2d : public Operation {
+          const std::array<uint32_t, 4>& pad, int32_t multiplier = 0,
+          DataLayout input_layout = DataLayout::WHCN,
+          DataLayout kernel_layout = DataLayout::WHIcOc);
++  Conv2d(Graph* graph, int32_t weights, PadType padding,
++         const std::array<uint32_t, 2>& ksize,
++         const std::array<uint32_t, 2>& stride,
++         const std::array<uint32_t, 2>& dilation,
++         const std::array<uint32_t, 4>& pad,
++         uint32_t group = 1, int32_t multiplier = 0,
++         DataLayout input_layout = DataLayout::WHCN,
++         DataLayout kernel_layout = DataLayout::WHIcOc);
++
+ 
+   DataLayout KernelDataLayout() { return kernel_layout_; }
+ 
+@@ -65,4 +74,4 @@ class Conv2d : public Operation {
+ }  // namespace vx
+ }  // namespace tim
+ 
+-#endif /* TIM_VX_OPS_CONV2D_H_ */
+\ No newline at end of file
++#endif /* TIM_VX_OPS_CONV2D_H_ */
+diff --git a/include/tim/vx/ops/pool2d.h b/include/tim/vx/ops/pool2d.h
+index a39ecab..8bf714a 100644
+--- a/include/tim/vx/ops/pool2d.h
++++ b/include/tim/vx/ops/pool2d.h
+@@ -35,6 +35,13 @@ namespace ops {
+ 
+ class Pool2d : public Operation {
+  public:
++  Pool2d(Graph* graph, PoolType type, PadType padding,
++         const std::array<uint32_t, 2>& ksize,
++         const std::array<uint32_t, 2>& stride,
++         const std::array<uint32_t, 4>& pad,
++         RoundType round_type = RoundType::FLOOR,
++         DataLayout layout = DataLayout::WHCN);
++
+   Pool2d(Graph* graph, PoolType type, PadType padding,
+          const std::array<uint32_t, 2>& ksize,
+          const std::array<uint32_t, 2>& stride,
+@@ -53,4 +60,4 @@ class Pool2d : public Operation {
+ }  // namespace vx
+ }  // namespace tim
+ 
+-#endif /* TIM_VX_OPS_POOL2D_H_ */
+\ No newline at end of file
++#endif /* TIM_VX_OPS_POOL2D_H_ */
+diff --git a/src/tim/vx/ops/conv2d.cc b/src/tim/vx/ops/conv2d.cc
+index a166a40..6932ed2 100644
+--- a/src/tim/vx/ops/conv2d.cc
++++ b/src/tim/vx/ops/conv2d.cc
+@@ -70,6 +70,18 @@ Conv2d::Conv2d(Graph* graph, int32_t weights, PadType padding,
+   this->impl()->node()->nn_param.conv2d.multiplier = multiplier_;
+ }
+ 
++Conv2d::Conv2d(Graph* graph, int32_t weights, PadType padding,
++               const std::array<uint32_t, 2>& ksize,
++               const std::array<uint32_t, 2>& stride,
++               const std::array<uint32_t, 2>& dilation,
++               const std::array<uint32_t, 4>& pad,
++               uint32_t group, int32_t multiplier,
++               DataLayout input_layout, DataLayout kernel_layout)
++    : Conv2d(graph, weights, padding, ksize, stride, dilation, pad,
++             multiplier, input_layout, kernel_layout) {
++  this->impl()->node()->nn_param.conv2d.group = group;
++}
++
+ }  // namespace ops
+ }  // namespace vx
+-}  // namespace tim
+\ No newline at end of file
++}  // namespace tim
+diff --git a/src/tim/vx/ops/pool2d.cc b/src/tim/vx/ops/pool2d.cc
+index 82bd0cd..4edc6b1 100644
+--- a/src/tim/vx/ops/pool2d.cc
++++ b/src/tim/vx/ops/pool2d.cc
+@@ -51,6 +51,19 @@ Pool2d::Pool2d(Graph* graph, PoolType type, PadType padding,
+   this->impl()->node()->nn_param.pool.pad_type = TranslatePadType(padding_);
+ }
+ 
++Pool2d::Pool2d(Graph* graph, PoolType type, PadType padding,
++               const std::array<uint32_t, 2>& ksize,
++               const std::array<uint32_t, 2>& stride,
++               const std::array<uint32_t, 4>& pad,
++               RoundType round_type,
++               DataLayout layout)
++    : Pool2d(graph, type, padding, ksize, stride, round_type, layout){
++  this->impl()->node()->nn_param.pool.pad[0] = pad[0];
++  this->impl()->node()->nn_param.pool.pad[1] = pad[1];
++  this->impl()->node()->nn_param.pool.pad[2] = pad[2];
++  this->impl()->node()->nn_param.pool.pad[3] = pad[3];
++}
++
+ }  // namespace ops
+ }  // namespace vx
+-}  // namespace tim
+\ No newline at end of file
++}  // namespace tim
+-- 
+2.17.1
+

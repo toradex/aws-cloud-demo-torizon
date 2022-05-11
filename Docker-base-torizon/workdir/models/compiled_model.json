@@ -1,0 +1,374 @@
+{
+  "nodes": [
+    {
+      "op": "null", 
+      "name": "normalized_input_image_tensor", 
+      "inputs": []
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_layout_transform_42", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "func_name": "fused_layout_transform_42", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          0, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "vsi_npu_0", 
+      "attrs": {
+        "num_outputs": "2", 
+        "num_inputs": "1", 
+        "func_name": "vsi_npu_0", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          1, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_cast_subtract_cast_multiply", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "2", 
+        "func_name": "fused_cast_subtract_cast_multiply", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          2, 
+          0, 
+          0
+        ], 
+        [
+          2, 
+          1, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "vsi_npu_5", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "func_name": "vsi_npu_5", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          3, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_cast_subtract_cast_multiply_1", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "2", 
+        "func_name": "fused_cast_subtract_cast_multiply_1", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          2, 
+          0, 
+          0
+        ], 
+        [
+          2, 
+          1, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "vsi_npu_10", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "func_name": "vsi_npu_10", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          5, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "null", 
+      "name": "p504", 
+      "inputs": []
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "vsi_npu_11", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "func_name": "vsi_npu_11", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          7, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_expand_dims_9", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "func_name": "fused_expand_dims_9", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          8, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_vision_multibox_transform_loc", 
+      "attrs": {
+        "num_outputs": "2", 
+        "num_inputs": "3", 
+        "func_name": "fused_vision_multibox_transform_loc", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          4, 
+          0, 
+          0
+        ], 
+        [
+          6, 
+          0, 
+          0
+        ], 
+        [
+          9, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "null", 
+      "name": "p505", 
+      "inputs": []
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_vision_non_max_suppression", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "3", 
+        "func_name": "fused_vision_non_max_suppression", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          10, 
+          0, 
+          0
+        ], 
+        [
+          10, 
+          1, 
+          0
+        ], 
+        [
+          11, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "fused_vision_get_valid_counts", 
+      "attrs": {
+        "num_outputs": "3", 
+        "num_inputs": "1", 
+        "func_name": "fused_vision_get_valid_counts", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          12, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "vsi_npu_16", 
+      "attrs": {
+        "num_outputs": "3", 
+        "num_inputs": "1", 
+        "func_name": "vsi_npu_16", 
+        "flatten_data": "0"
+      }, 
+      "inputs": [
+        [
+          13, 
+          1, 
+          0
+        ]
+      ]
+    }
+  ], 
+  "arg_nodes": [0, 7, 11], 
+  "heads": [
+    [
+      14, 
+      0, 
+      0
+    ], 
+    [
+      14, 
+      1, 
+      0
+    ], 
+    [
+      14, 
+      2, 
+      0
+    ], 
+    [
+      13, 
+      0, 
+      0
+    ]
+  ], 
+  "attrs": {
+    "dltype": [
+      "list_str", 
+      [
+        "uint8", 
+        "uint8", 
+        "uint8", 
+        "uint8", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "int32", 
+        "int32", 
+        "float32", 
+        "int32", 
+        "float32", 
+        "int32", 
+        "float32", 
+        "float32", 
+        "float32"
+      ]
+    ], 
+    "shape": [
+      "list_shape", 
+      [
+        [1, 300, 300, 3], 
+        [1, 3, 300, 300], 
+        [1, 1917, 91], 
+        [1, 1917, 4], 
+        [1, 1917, 91], 
+        [1, 91, 1917], 
+        [1, 1917, 4], 
+        [1, 7668], 
+        [1917, 4], 
+        [1917, 4], 
+        [1, 1917, 4], 
+        [1, 1917, 6], 
+        [1], 
+        [], 
+        [1, 1917, 6], 
+        [1], 
+        [1, 1917, 6], 
+        [1, 1917], 
+        [1, 10, 4], 
+        [1, 10], 
+        [1, 10]
+      ]
+    ], 
+    "storage_id": [
+      "list_int", 
+      [
+        0, 
+        1, 
+        2, 
+        3, 
+        1, 
+        4, 
+        5, 
+        2, 
+        6, 
+        5, 
+        3, 
+        1, 
+        7, 
+        8, 
+        2, 
+        7, 
+        4, 
+        5, 
+        9, 
+        10, 
+        11
+      ]
+    ]
+  }, 
+  "node_row_ptr": [
+    0, 
+    1, 
+    2, 
+    4, 
+    5, 
+    6, 
+    7, 
+    8, 
+    9, 
+    10, 
+    11, 
+    13, 
+    14, 
+    15, 
+    18, 
+    21
+  ]
+}

@@ -1,0 +1,13 @@
+{
+    "algorithm": "blake2s",
+    "files": [
+        {
+            "name": "manifest",
+            "hash": "767199cb2e1d4ad78bd78f5a2aa13ad4ebf6ae7607313f49dea31a31ef3aa460"
+        }
+    ],
+    "metadata": {
+        "model_name": "ssd-mobilenet-v1",
+        "model_version": "1.0"
+    }
+}

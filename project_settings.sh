@@ -1,0 +1,5 @@
+AWS_REGION="us-west-2"
+PROJECT_NAME="dlr-demo-torizon-05-11-22-11-44-57"
+DOCKERHUB_LOGIN="denisyuji"
+BOARD_IP="verdin-imx8mp-06849027.local"
+BOARD_PWD="1"

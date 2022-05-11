@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish",
+        "iot:Subscribe",
+        "iot:Receive",
+        "iot:Connect",
+        "greengrass:*",
+        "s3:*",
+        "sagemaker:*"
+      ],
+      "Resource": [
+        "*"
+      ]
+    }
+  ]
+}

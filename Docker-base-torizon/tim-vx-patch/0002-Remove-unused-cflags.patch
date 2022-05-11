@@ -1,0 +1,26 @@
+From 443c20b883c87fbbb5034ec93fad5f6005a179c0 Mon Sep 17 00:00:00 2001
+From: Feng Guo <feng.guo@nxp.com>
+Date: Thu, 17 Jun 2021 23:00:34 +0800
+Subject: [PATCH 2/2] Remove unused cflags
+
+Signed-off-by: Feng Guo <feng.guo@nxp.com>
+---
+ CMakeLists.txt | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9241626..cbf94fc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,8 +6,6 @@ OPTION(TIM_VX_ENABLE_LAYOUT_INFER   "Enable layout inference support"   ON)
+ 
+ set(CMAKE_CXX_STANDARD 14)
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Werror -Wno-enum-conversion")
+-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Werror")
+ 
+ if(NOT DEFINED CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "..." FORCE)
+-- 
+2.17.1
+

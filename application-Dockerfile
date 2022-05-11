@@ -1,0 +1,59 @@
+FROM --platform=linux/arm64 debian:sid-slim AS base
+
+WORKDIR /home/torizon
+
+# workaround described here: https://forums.debian.net/viewtopic.php?t=135049
+
+RUN rm -rf /var/lib/apt/lists
+
+# Install GLIBC 2.33
+RUN apt-get -y update && apt-get install -y \
+  libc6 libc6-dev
+
+## Install Python
+RUN apt-get -y update && apt-get install -y \
+  python3 python3-dev
+
+#
+# Install Pip and Wheel
+RUN apt-get -y update && apt-get install -y \
+  python3-pip python3-setuptools python3-wheel
+
+## Build tools
+RUN apt-get -y update && apt-get install -y \
+    cmake build-essential gcc g++ git wget patchelf
+
+RUN git config --global user.email "you@example.com" && \
+  git config --global user.name "Your Name"
+
+## Prepare build output directory
+COPY Docker-base-torizon/global_variables.sh global_variables.sh
+## Install imx-gpu-viv , including OpenVX
+COPY Docker-base-torizon/imx-gpu-viv_6.4.3.p2.2-aarch64.sh imx-gpu-viv_6.4.3.p2.2-aarch64.sh
+RUN ./imx-gpu-viv_6.4.3.p2.2-aarch64.sh && rm -rf imx-gpu-viv_6.4.3.p2.2-aarch64.sh
+
+## Install nn-imx
+COPY Docker-base-torizon/nn-imx_1.2.0.sh nn-imx_1.2.0.sh
+RUN ./nn-imx_1.2.0.sh
+
+## Install tim-vx
+COPY Docker-base-torizon/tim-vx_1.1.32.sh tim-vx_1.1.32.sh
+COPY Docker-base-torizon/tim-vx-patch tim-vx-patch
+RUN ./tim-vx_1.1.32.sh
+RUN cp -r /workdir/tim-vx/build/install/* /usr/ && ldconfig -v
+
+## Install Greengrass dependency
+
+RUN apt-get -y update && apt-get install -y \
+  default-jre
+
+RUN groupadd -r ggc_group
+RUN useradd -r -m -N -g ggc_group -s /bin/false ggc_user
+
+RUN apt-get -y update && apt-get install -y \
+  python3-pexpect
+
+COPY dlr-demo/check_result.py .
+
+ENTRYPOINT \
+  python3 check_result.py $PROJECT_NAME

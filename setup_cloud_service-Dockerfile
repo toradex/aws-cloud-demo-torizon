@@ -1,0 +1,22 @@
+FROM debian:bullseye-slim
+
+## Install demo dependencies
+RUN apt-get -y update && apt-get install -y \
+  curl unzip wget jq less uuid-runtime
+
+## Install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+  -o "awscliv2.zip" && \
+  unzip awscliv2.zip && ./aws/install && \
+  rm -rf /root/.aws/credentials awscliv2.zip aws
+
+## Prepare Greengrass to execute on the target
+COPY Docker-base-torizon/greengrass-bin greengrass-bin
+RUN ./greengrass-bin/greengrass-bin_2.4.0.sh
+
+WORKDIR /root
+COPY dlr-demo /root
+
+ENTRYPOINT \
+  bash ./setup_cloud_service_and_device.sh && \
+  tar -czvf /deploy/greengrass-$PROJECT_NAME.tar.gz /greengrass
