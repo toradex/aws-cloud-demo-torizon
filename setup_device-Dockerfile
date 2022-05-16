@@ -54,4 +54,4 @@ RUN groupadd -r ggc_group
 RUN useradd -r -m -N -g ggc_group -s /bin/false ggc_user
 
 ENTRYPOINT \
-  /greengrass/v2/alts/init/distro/bin/loader
+  /greengrass/v2/alts/current/distro/bin/loader
