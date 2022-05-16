@@ -35,6 +35,12 @@ The default password is `torizon`. The system will ask you to change this passwo
 # sudo systemctl disable docker-compose
 ```
 
+Reset the board.
+
+```
+# sudo reboot
+```
+
 Take a note of the IP and the new password.
 
 # Setting Up #
