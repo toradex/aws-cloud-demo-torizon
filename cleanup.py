@@ -12,7 +12,8 @@ def execute(command):
 print("Cancelling greengrass deployment")
 output=cmd('aws greengrassv2 list-deployments')
 for i in output["deployments"]:
-    execute("aws greengrassv2 cancel-deployment --deployment-id "+ i["deploymentId"])
+    if ((i["deploymentStatus"]!="CANCELED")and(i["deploymentStatus"]!="FAILED")):
+        execute("aws greengrassv2 cancel-deployment --deployment-id "+ i["deploymentId"])
 
 print("Deleting greengrass components")
 output=cmd('aws greengrassv2 list-components')
