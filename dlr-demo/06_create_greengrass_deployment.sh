@@ -23,7 +23,7 @@ if [ ! ${RESULTS_BUCKET_NAME} ]; then
   exit 1
 fi
 if [ ! ${CAMERA_COMPONENT_NAME} ]; then
-  echo "Please set RESULTS_BUCKET_NAME..."
+  echo "Please set CAMERA_COMPONENT_NAME..."
   exit 1
 fi
 if [ ! ${MODEL_COMPONENT_NAME} ]; then
