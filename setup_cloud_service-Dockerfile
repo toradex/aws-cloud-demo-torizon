@@ -19,4 +19,5 @@ COPY dlr-demo /root
 
 ENTRYPOINT \
   bash ./setup_cloud_service_and_device.sh && \
-  tar -czvf /deploy/greengrass-$PROJECT_NAME.tar.gz /greengrass
+  tar -czvf /deploy/greengrass-$PROJECT_NAME.tar.gz /greengrass && \
+  cp project_config.sh /deploy/
