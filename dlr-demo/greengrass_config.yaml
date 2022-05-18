@@ -1,19 +1,15 @@
----
 system:
-  certificateFilePath: "/greengrass/v2/device.pem.crt"
+  thingName: "GREENGRASS_THING_NAME"
   privateKeyPath: "/greengrass/v2/private.pem.key"
   rootCaPath: "/greengrass/v2/AmazonRootCA1.pem"
+  certificateFilePath: "/greengrass/v2/device.pem.crt"
   rootpath: "/greengrass/v2"
-  thingName: "GREENGRASS_THING_NAME"
 services:
+  main:
+    lifecycle: {}
   aws.greengrass.Nucleus:
-    componentType: "NUCLEUS"
-    version: "2.5.3"
     configuration:
       awsRegion: "AWS_REGION"
-      iotRoleAlias: "IOT_ROLE_ALIAS_NAME"
-      iotDataEndpoint: "IOT_DATA_ENDPOINT"
       iotCredEndpoint: "IOT_CRED_ENDPOINT"
-      mqtt:
-        port: 443
-      greengrassDataPlanePort: 443
+      iotDataEndpoint: "IOT_DATA_ENDPOINT"
+      iotRoleAlias: "IOT_ROLE_ALIAS_NAME"
