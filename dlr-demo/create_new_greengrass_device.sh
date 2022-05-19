@@ -27,4 +27,4 @@ ROLE_ALIAS_NAME=${PROJECT_NAME}_GreengrassCoreRoleAlias
 ROLE_ALIAS_POLICY_NAME=${PROJECT_NAME}_GreengrassCoreRoleAliasPolicy
 aws iot attach-policy --policy-name ${ROLE_ALIAS_POLICY_NAME} --target ${CERT_ARN}
 
-source ./08_setup_device_greengrass.sh
+source ./07_setup_device_greengrass.sh
