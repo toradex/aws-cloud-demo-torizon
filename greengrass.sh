@@ -17,6 +17,7 @@ sshpass -p $BOARD_PWD ssh -t torizon@$BOARD_IP "\
     -v /tmp:/tmp \
     -v /run/udev/:/run/udev/ \
     -v /greengrass/:/greengrass/ \
+    --device-cgroup-rule='c 81:* rmw' \
     --device-cgroup-rule='c 4:* rmw' \
     --device-cgroup-rule='c 13:* rmw' \
     --device-cgroup-rule='c 199:* rmw' \
@@ -24,4 +25,3 @@ sshpass -p $BOARD_PWD ssh -t torizon@$BOARD_IP "\
     -e ACCEPT_FSL_EULA=1 \
     --name $PROJ_NAME \
     $DOCKERHUB_LOGIN/$PROJ_NAME"
-  "
