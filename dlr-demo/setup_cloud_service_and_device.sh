@@ -47,7 +47,7 @@ fi
 source ./00_setup_cloud_service.sh
 
 sleep 30
-source ./07_setup_device_greengrass.sh
+source ./08_setup_device_greengrass.sh
 
 #sleep 30
 #python3 ./check_result.py ${PROJECT_NAME}
