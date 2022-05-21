@@ -57,3 +57,5 @@ echo "CAMERA_COMPONENT_ARN=${CAMERA_COMPONENT_ARN}" >> project_config.sh
 MODEL_VERSION=1.0.0       #deploy 1.0.0 first
 source ./06_create_greengrass_deployment.sh
 echo "DEPLOYMENT_ID=${DEPLOYMENT_ID}" >> project_config.sh
+
+source ./08_create_kinesis_video_stream.sh
