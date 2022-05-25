@@ -45,13 +45,50 @@ RUN cp -r /workdir/tim-vx/build/install/* /usr/ && ldconfig -v
 ## Install Greengrass dependency
 
 RUN apt-get -y update && apt-get install -y \
-  default-jre
-
-RUN apt-get -y update && apt-get install -y \
-  sudo
-
+  default-jre sudo
 RUN groupadd -r ggc_group
 RUN useradd -r -m -N -g ggc_group -s /bin/false ggc_user
+
+## Install GStreamer
+
+RUN apt-get -y update && apt-get install -y \
+  libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+  libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base \
+  gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+  gstreamer1.0-plugins-ugly gstreamer1.0-libav \
+  gstreamer1.0-tools gstreamer1.0-x \
+  gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 \
+  gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+
+# Build Kvssink
+
+RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git
+
+RUN apt-get -y update && apt-get install -y \
+  m4 libssl-dev libcurl4-openssl-dev liblog4cplus-dev
+
+RUN mkdir -p amazon-kinesis-video-streams-producer-sdk-cpp/build && \
+  cd amazon-kinesis-video-streams-producer-sdk-cpp/build && \
+  cmake -DBUILD_GSTREAMER_PLUGIN=TRUE -DBUILD_DEPENDENCIES=OFF .. && make -j4
+
+RUN mkdir -p /home/torizon/log/ && touch /home/torizon/log/kvs.log
+
+ENV GST_PLUGIN_PATH /home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/build
+ENV LD_LIBRARY_PATH /home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib
+
+COPY Docker-base-torizon/aws-kinesis/kvs_log_configuration.txt .
+
+ENV GST_DEBUG_DUMP_DOT_DIR=/home/torizon/TMP
+
+RUN gst-inspect-1.0
+
+## Install application dependencies
+
+RUN pip3 install awsiotsdk
+
+RUN apt-get -y update && apt-get install -y \
+  python3-numpy python3-gi-cairo python3-grpcio\
+  python3-opencv python3-yaml
 
 ENTRYPOINT \
   /greengrass/v2/alts/current/distro/bin/loader

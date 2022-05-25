@@ -15,8 +15,9 @@ from awsiot.greengrasscoreipc.model import (
 import math
 import agent_pb2_grpc
 import grpc
+import yaml
 from agent_pb2 import (ListModelsRequest, LoadModelRequest, PredictRequest,
-                       UnLoadModelRequest, DescribeModelRequest, CaptureDataRequest, Tensor, 
+                       UnLoadModelRequest, DescribeModelRequest, CaptureDataRequest, Tensor,
                        TensorMetadata, Timestamp)
 import signal
 import sys
@@ -63,13 +64,10 @@ SIZE = 300
 tensor_shape = [1, SIZE, SIZE, 3]
 
 inference_result_topic = "em/inference"
-ipc_client = awsiot.greengrasscoreipc.connect()
+# ipc_client = awsiot.greengrasscoreipc.connect()
 
 channel = grpc.insecure_channel('unix:///tmp/sagemaker_edge_agent_example.sock')
 edge_manager_client = agent_pb2_grpc.AgentStub(channel)
-
-#kinesis_client = boto3.client('kinesis', region_name='us-east-1')
-
 
 class ObjectDetection:
     """NNStreamer example for Object Detection."""
@@ -113,29 +111,34 @@ class ObjectDetection:
         #self.loop = GObject.MainLoop()
 
         gst_launch_cmdline = ''
-        if len(str(stream_path).split('.')) > 1:
-            gst_launch_cmdline = ' filesrc location={:s} ! matroskademux ! h264parse !'.format(stream_path)
-        else:
-            gst_launch_cmdline = 'v4l2src device=/dev/video{:s} do-timestamp=True !'.format(stream_path)
-        gst_launch_cmdline += '  queue name=thread-decode max-size-buffers=2 ! vpudec ! imxvideoconvert_g2d !'
-        gst_launch_cmdline += '  video/x-raw,width={:d},height={:d} ! tee name=t '.format(self.VIDEO_WIDTH, self.VIDEO_HEIGHT)
-        gst_launch_cmdline += ' t. ! queue name=thread-nn max-size-buffers=2 leaky=2 !'
-        gst_launch_cmdline += '  imxvideoconvert_g2d !'
-        gst_launch_cmdline += '  video/x-raw,width={:d},height={:d},format=RGBA !'.format(self.MODEL_WIDTH, self.MODEL_HEIGHT)
-        gst_launch_cmdline += '  videoconvert ! video/x-raw,format=RGB !'
-        gst_launch_cmdline += '  appsink name=sink drop=True max-buffers=1 emit-signals=True sync=False'
-        gst_launch_cmdline += ' t. ! queue name=thread-img max-size-buffers=2 !'
-        gst_launch_cmdline += ' cairooverlay name=drawlay ! imxvideoconvert_g2d ! videoconvert !'
+        gst_launch_cmdline += 'v4l2src device=/dev/video0 extra-controls="controls,horizontal_flip=1,vertical_flip=1" ! video/x-raw,width=640,height=480,format=BGR,interlace-mode=progressive ! '
 
-        gst_launch_cmdline += ' waylandsink sync=True'
-        #gst_launch_cmdline += ' tee name=tsink'
-        #gst_launch_cmdline += ' tsink. ! queue name=thread-display max-size-buffers=2 leaky=0 ! waylandsink'
-        #gst_launch_cmdline += ' tsink. ! queue name=thread-encode max-size-buffers=2 leaky=0 !'
-        #gst_launch_cmdline += ' x264enc !'  # mp4
-        #gst_launch_cmdline += ' vpuenc_h264 !' # mkv
-        #gst_launch_cmdline += '  rtph264pay ! udpsink host=10.192.208.100 port=5000'
+        gst_launch_cmdline += 'tee name=t  t. ! queue name=thread-nn max-size-buffers=2 leaky=2 !  videoconvert n-threads=4 primaries-mode=fast ! videoscale method=nearest-neighbour add-borders=true ! video/x-raw,format=RGB,width=300,height=300 ! appsink name=sink drop=True max-buffers=1 emit-signals=True sync=False '
 
-        print(gst_launch_cmdline)
+        with open(r'/greengrass/v2/config/config.yaml') as file:
+            # The FullLoader parameter handles the conversion from YAML
+            # scalar values to Python the dictionary format
+            config = yaml.load(file, Loader=yaml.FullLoader)
+
+        gst_launch_cmdline += 't. ! queue name=thread-img max-size-buffers=2 ! videoconvert n-threads=4 primaries-mode=fast ! cairooverlay name=drawlay ! videorate ! queue ! video/x-raw,framerate=30/1 ! videoconvert n-threads=4 primaries-mode=fast ! x264enc speed-preset=ultrafast threads=4 tune=zerolatency bframes=0 key-int-max=45 ! video/x-h264,stream-format=avc,alignment=au,profile=baseline ! kvssink fragment-duration=200 framerate=30 fragment-duration=500 streaming-type=0 avg-bandwidth-bps=500000 stream-name="'
+
+        gst_launch_cmdline += config["system"]["thingName"]
+
+        gst_launch_cmdline += '" aws-region="'
+
+        gst_launch_cmdline += config["services"]["aws.greengrass.Nucleus"]["configuration"]["awsRegion"]
+
+        gst_launch_cmdline += '" log-config=/home/torizon/kvs_log_configuration.txt iot-certificate="iot-certificate,endpoint='
+
+        gst_launch_cmdline += config["services"]["aws.greengrass.Nucleus"]["configuration"]["iotCredEndpoint"]
+
+        gst_launch_cmdline += ',cert-path=/greengrass/v2/device.pem.crt,key-path=/greengrass/v2/private.pem.key,ca-path=/greengrass/v2/AmazonRootCA1.pem,role-aliases='
+
+        gst_launch_cmdline += config["services"]["aws.greengrass.Nucleus"]["configuration"]["iotRoleAlias"]
+
+        gst_launch_cmdline += '"'
+
+        print("\n\n\n",gst_launch_cmdline,"\n\n\n")
 
         self.pipeline = Gst.parse_launch(gst_launch_cmdline)
 
@@ -362,7 +365,7 @@ def preprocess_frame(captured_frame):
         scaled_frame = (scaled_frame/127.5).astype(np.float32)
         scaled_frame -= 1.
         return scaled_frame
-    
+
     else:
         img = cv2.cvtColor(captured_frame, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (SIZE,SIZE))
@@ -468,18 +471,18 @@ def process_output_tensor(response):
 
     return detections
 
-# IPC publish to IoT Core
-def publish_results_to_iot_core (message):
-    # Publish highest confidence result to AWS IoT Core
-    global ipc_client
-    request = PublishToIoTCoreRequest()
-    request.topic_name = inference_result_topic
-    request.payload = bytes(json.dumps(message), "utf-8")
-    request.qos = QOS.AT_LEAST_ONCE
-    operation = ipc_client.new_publish_to_iot_core()
-    operation.activate(request)
-    future = operation.get_response()
-    future.result(10)
+# # IPC publish to IoT Core
+# def publish_results_to_iot_core (message):
+#     # Publish highest confidence result to AWS IoT Core
+#     global ipc_client
+#     request = PublishToIoTCoreRequest()
+#     request.topic_name = inference_result_topic
+#     request.payload = bytes(json.dumps(message), "utf-8")
+#     request.qos = QOS.AT_LEAST_ONCE
+#     operation = ipc_client.new_publish_to_iot_core()
+#     operation.activate(request)
+#     future = operation.get_response()
+#     future.result(10)
 
 def run():
     try:
@@ -490,6 +493,7 @@ def run():
 
     while (True):
         try:
+            print("Loading ",model_name," at: ",model_url)
             response = edge_manager_client.LoadModel(
                 LoadModelRequest(url=model_url, name=model_name))
             break
@@ -497,8 +501,8 @@ def run():
             print('Model failed to load')
             sys.exit(-1)
 
-    os.environ["XDG_RUNTIME_DIR"] = "/run/user/0"
-    os.environ["QT_QPA_PLATFORM"] = "wayland"
+    # os.environ["XDG_RUNTIME_DIR"] = "/run/user/0"
+    # os.environ["QT_QPA_PLATFORM"] = "wayland"
 
     example = ObjectDetection()
     example.run()

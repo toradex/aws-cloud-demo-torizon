@@ -20,8 +20,8 @@ aws s3api put-object --bucket ${COMPONENTS_BUCKET_NAME} \
   --key artifacts/aws.sagemaker.edgeManagerClientCameraIntegration/0.1.0/agent_pb2.py \
   --body components/agent_pb2.py
 aws s3api put-object --bucket ${COMPONENTS_BUCKET_NAME} \
-  --key artifacts/aws.sagemaker.edgeManagerClientCameraIntegration/0.1.0/camera_integration_edgemanger_client.py \
-  --body components/camera_integration_edgemanger_client.py
+  --key artifacts/aws.sagemaker.edgeManagerClientCameraIntegration/0.1.0/camera_integration_edgemanger_client_gst.py \
+  --body components/camera_integration_edgemanger_client_gst.py
 
 COMPONENTS_RECIPE=aws.sagemaker.edgeManagerClientCameraIntegration-0.1.0.yaml
 cp components/${COMPONENTS_RECIPE} .
