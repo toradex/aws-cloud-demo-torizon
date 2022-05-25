@@ -22,12 +22,10 @@ Scan your local network to find the board IP and MAC address. You can [use the c
 Connect to Maivin's terminal using `ssh` with the default username `torizon`:
 
 ```
-# ssh torizon@<board-ip>
+$ ssh torizon@<board-ip>
 ```
 
-The default password is `torizon`. The system will ask you to change this password on firt boot.
-
-6 - Execute the script `./run.sh`
+The default password is `torizon`. The system will ask you to change this password on firt boot. On some units, the default password may be already set to `1`.
 
 **On your board's terminal** , stop the pre-provisioned containers by sending the command:
 
@@ -41,7 +39,7 @@ Reset the board.
 # sudo reboot
 ```
 
-Take a note of the IP and the new password.
+Take a note of the IP and password.
 
 # Setting Up #
 
@@ -53,9 +51,9 @@ Set `PROJECT_NAME` with a unique project name.
 
 Set `DOCKERHUB_LOGIN` with your dockerhub username. This will be used to push and pull containers to Maivin.
 
-Set your `BOARD_IP` as found on the previous steps.
+Set your `BOARD_IP` as found on the previous steps. You can also use the hostname.
 
-Set `BOARD_PWD` with the new password for Maivin as described in the previous steps.
+Set `BOARD_PWD` with the password for Maivin as described in the previous steps.
 
 ## Install the services in the Cloud ##
 
@@ -66,16 +64,71 @@ $ cd aws-cloud-demo-torizon
 $ ./setup_cloud_service.sh
 ```
 
-It may take about 10 minutes to conclude.
+It may take about 15 minutes to conclude.
 
 ## Install the credentials in the device ##
 
-**on your PC**, use `setup_device.sh` script
+**on your PC**, use `setup_device.sh` script. This will install greengrass on Maivin's filesystem, with its credentials and certificates.
 
 ```
 $ ./setup_device.sh
 ```
 
+After this, **on your PC terminal**, use `greengrass.sh` to start execution of greengrass on maivin:
+
+
+```
+$ ./greengrass.sh
+```
+
 This will start Nucleos.
 
+You can execute everything by sending:
 
+```
+$ ./setup_cloud_service.sh && ./setup_device.sh && ./greengrass.sh 
+```
+
+## Observing Greengrass logs ##
+
+With greengrass container running, **On your PC, create a new terminal window**. Connect to your board using `ssh`:
+
+```
+$ ssh torizon@<board-ip>
+``` 
+
+On the board's terminal, connect to the shell of the running container:
+
+```
+# docker exec -it aws-cloud-demo-torizon /bin/bash
+```
+
+It will start the bash terminal of the container. The logs are on the `/greengrass/v2/logs` directory:
+
+```
+## cd /greengrass/v2/logs/
+## ls
+aws.greengrass.LegacySubscriptionRouter.log
+aws.greengrass.Nucleus.log
+aws.greengrass.SageMakerEdgeManager.log
+04_edgeManagerClientCameraIntegration.log
+dlr-demo-torizon-mobilenet-ssd-v2-coco-quant.log
+greengrass.log
+main.log
+```
+
+## Observing the results ##
+
+Get into the AWS console, go to `Kinesis Video Stream` service and select the video stream and watch the video playback.
+
+# Cleaning up everything #
+
+**CAUTION: THIS WILL DELETE ALL THE THINGS ON YOUR AWS ACCOUNT.**
+
+To wipe all things and deployments created on your account, use the python `cleanup.py` script.
+
+```
+$ python3 cleanup.py
+```
+
+**CAUTION: THIS WILL DELETE ALL THE THINGS ON YOUR AWS ACCOUNT.**
