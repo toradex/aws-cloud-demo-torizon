@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 debian:sid-slim AS base
+FROM --platform=linux/arm64 debian:bookworm-slim AS base
 
 WORKDIR /home/torizon
 
