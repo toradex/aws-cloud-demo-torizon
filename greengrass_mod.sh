@@ -28,11 +28,11 @@ docker push $DOCKERHUB_LOGIN/$PROJ_NAME
 
 ssh -t torizon@$BOARD_IP "\
   docker pull $DOCKERHUB_LOGIN/$PROJ_NAME && \
-  docker run -it --rm --network host \
+  docker run -it --network host \
     -v /dev:/dev \
     -v /tmp:/tmp \
     -v /run/udev/:/run/udev/ \
-    -v /greengrass/:/greengrass/ \
+    -v /home/torizon/greengrass/:/greengrass/ \
     --device-cgroup-rule='c 81:* rmw' \
     --device-cgroup-rule='c 4:* rmw' \
     --device-cgroup-rule='c 13:* rmw' \

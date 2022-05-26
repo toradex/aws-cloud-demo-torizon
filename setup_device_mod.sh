@@ -28,5 +28,5 @@ scp -r \
 #   "
 
 ssh -t torizon@$BOARD_IP "\
-  (echo $BOARD_PWD | sudo -S tar xvf greengrass-*.tar.gz -C / ) \
+  (echo $BOARD_PWD | sudo -S tar xvf greengrass-*.tar.gz -C . ) \
   "
