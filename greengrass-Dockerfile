@@ -63,23 +63,15 @@ RUN apt-get -y update && apt-get install -y \
 # Build Kvssink
 
 RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git
-
 RUN apt-get -y update && apt-get install -y \
   m4 libssl-dev libcurl4-openssl-dev liblog4cplus-dev
-
 RUN mkdir -p amazon-kinesis-video-streams-producer-sdk-cpp/build && \
   cd amazon-kinesis-video-streams-producer-sdk-cpp/build && \
   cmake -DBUILD_GSTREAMER_PLUGIN=TRUE -DBUILD_DEPENDENCIES=OFF .. && make -j4
-
 RUN mkdir -p /home/torizon/log/ && touch /home/torizon/log/kvs.log
-
 ENV GST_PLUGIN_PATH /home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/build
 ENV LD_LIBRARY_PATH /home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib
-
 COPY Docker-base-torizon/aws-kinesis/kvs_log_configuration.txt .
-
-ENV GST_DEBUG_DUMP_DOT_DIR=/home/torizon/TMP
-
 RUN gst-inspect-1.0
 
 ## Install application dependencies
