@@ -5,7 +5,7 @@ PN='tim-vx'
 PV='1.1.32'
 S=${WORKDIR}'/'${PN}
 SRCBRANCH='lf-5.10.52_2.1.0'
-TIM_VX_SRC='https://github.com/nxpmicro/tim-vx-imx'
+TIM_VX_SRC='https://github.com/NXPmicro/tim-vx-imx.git'
 PKG_CONFIG_SYSROOT_DIR="/"
 
 EXTRA_OECMAKE=" \
@@ -21,3 +21,5 @@ pushd ${S} && \
   mkdir build && pushd build && \
   cmake ${EXTRA_OECMAKE} .. && make -j`nproc` all install && \
   popd && popd
+
+cp /usr/lib/mx8mp/* /usr/lib/
