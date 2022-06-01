@@ -33,6 +33,8 @@ gi.require_version('Gst', '1.0')
 gi.require_foreign('cairo')
 from gi.repository import Gst, GObject
 
+os.environ["GST_PLUGIN_PATH"]="/home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/build"
+os.environ["LD_LIBRARY_PATH"]="/home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--stream', action='store', type=str, required=True, dest='stream_path', help='Video source URL')
