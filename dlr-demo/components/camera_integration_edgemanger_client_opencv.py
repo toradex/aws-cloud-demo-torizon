@@ -16,7 +16,7 @@ import math
 import agent_pb2_grpc
 import grpc
 from agent_pb2 import (ListModelsRequest, LoadModelRequest, PredictRequest,
-                       UnLoadModelRequest, DescribeModelRequest, CaptureDataRequest, Tensor, 
+                       UnLoadModelRequest, DescribeModelRequest, CaptureDataRequest, Tensor,
                        TensorMetadata, Timestamp)
 import signal
 import sys
@@ -109,7 +109,7 @@ def preprocess_frame(captured_frame):
         scaled_frame = (scaled_frame/127.5).astype(np.float32)
         scaled_frame -= 1.
         return scaled_frame
-    
+
     else:
         img = cv2.cvtColor(captured_frame, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (SIZE,SIZE))
