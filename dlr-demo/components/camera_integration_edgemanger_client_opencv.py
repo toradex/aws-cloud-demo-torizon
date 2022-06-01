@@ -21,9 +21,12 @@ from agent_pb2 import (ListModelsRequest, LoadModelRequest, PredictRequest,
 import signal
 import sys
 import uuid
-
+import yaml
 #import boto3
 import threading,os
+
+os.environ["GST_PLUGIN_PATH"]="/home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/build"
+os.environ["LD_LIBRARY_PATH"]="/home/torizon/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--stream', action='store', type=str, required=True, dest='stream_path', help='Video source URL')
@@ -55,7 +58,7 @@ SIZE = 300
 tensor_shape = [1, SIZE, SIZE, 3]
 
 inference_result_topic = "em/inference"
-ipc_client = awsiot.greengrasscoreipc.connect()
+# ipc_client = awsiot.greengrasscoreipc.connect()
 
 channel = grpc.insecure_channel('unix:///tmp/sagemaker_edge_agent_example.sock')
 edge_manager_client = agent_pb2_grpc.AgentStub(channel)
@@ -63,14 +66,60 @@ edge_manager_client = agent_pb2_grpc.AgentStub(channel)
 #kinesis_client = boto3.client('kinesis', region_name='us-east-1')
 
 
-def v4l2_camera_pipeline(width, height, device, frate,
-                         leaky="leaky=downstream max-size-buffers=1"):
+def v4l2_camera_pipeline(width, height, device,
+                         leaky="max-size-buffers=2 leaky=2"):
 
-    return (("v4l2src device={} ! video/x-raw,width={},height={},framerate={} "\
-             "! queue {} ! videoconvert ! appsink").format(device, width,
-                                                              height, frate,
-                                                              leaky))
+    gst_pipeline="v4l2src device="+device
+    gst_pipeline+=" extra-controls=\"controls,horizontal_flip=1,vertical_flip=1\" ! "
+    gst_pipeline+="video/x-raw,format=BGR,framerate=20/1,"
+    gst_pipeline+="width="+str(width)+",height="+str(height)+" ! "
+    gst_pipeline+="queue "+leaky+" ! "
+    gst_pipeline+="videoconvert n-threads=4 primaries-mode=fast ! "
+    gst_pipeline+="videoscale method=nearest-neighbour add-borders=true !"
 
+    gst_pipeline+="video/x-raw,format=BGR,"
+    if(width>height):
+        gst_pipeline+="width="+str(width)+",height="+str(width)+" ! "
+    else:
+        gst_pipeline+="width="+str(height)+",height="+str(height)+" ! "
+
+    gst_pipeline+="appsink"
+    # gst_pipeline=("v4l2src device={} extra-controls=\"controls,horizontal_flip=1,vertical_flip=1\" ! \
+    # video/x-raw,width=640,height=480,interlace-mode=progressive ! "\
+    # "queue max-size-buffers=2 leaky=2 !  videoconvert n-threads=4 primaries-mode=fast ! videoscale method=nearest-neighbour add-borders=true ! "\
+    # "video/x-raw,width={},height={},framerate={} ! queue {} ! videoconvert ! appsink").format(device, width,
+    #                                               height, frate,
+    #                                               leaky)
+
+    print(gst_pipeline)
+    return (gst_pipeline)
+
+def video_output_pipeline():
+    with open(r'/greengrass/v2/config/config.yaml') as file:
+        # The FullLoader parameter handles the conversion from YAML
+        # scalar values to Python the dictionary format
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    gst_output_pipeline = 'appsrc ! videoconvert n-threads=4 primaries-mode=fast ! x264enc speed-preset=ultrafast threads=4 tune=zerolatency bframes=0 key-int-max=45 ! video/x-h264,stream-format=avc,alignment=au,profile=baseline ! kvssink fragment-duration=200 framerate=20 fragment-duration=500 streaming-type=0 avg-bandwidth-bps=500000 stream-name="'
+
+    gst_output_pipeline += config["system"]["thingName"]
+
+    gst_output_pipeline += '" aws-region="'
+
+    gst_output_pipeline += config["services"]["aws.greengrass.Nucleus"]["configuration"]["awsRegion"]
+
+    gst_output_pipeline += '" log-config=/home/torizon/kvs_log_configuration.txt iot-certificate="iot-certificate,endpoint='
+
+    gst_output_pipeline += config["services"]["aws.greengrass.Nucleus"]["configuration"]["iotCredEndpoint"]
+
+    gst_output_pipeline += ',cert-path=/greengrass/v2/device.pem.crt,key-path=/greengrass/v2/private.pem.key,ca-path=/greengrass/v2/AmazonRootCA1.pem,role-aliases='
+
+    gst_output_pipeline += config["services"]["aws.greengrass.Nucleus"]["configuration"]["iotRoleAlias"]
+
+    gst_output_pipeline += '"'
+
+    print(gst_output_pipeline)
+    return (gst_output_pipeline)
 
 def v4l2_video_pipeline(device, leaky="leaky=downstream max-size-buffers=1"):
 
@@ -86,7 +135,7 @@ def sigterm_handler(signum, frame):
         print ('In sigterm_handler..........')
         stop_sigterm = True
         time.sleep(1)
-        response = edge_manager_client.UnLoadModel(UnLoadModelRequest(name=model_name))
+        # response = edge_manager_client.UnLoadModel(UnLoadModelRequest(name=model_name))
         sys.exit(0)
     except Exception as e:
         print ('Model failed to unload')
@@ -229,40 +278,38 @@ def publish_results_to_iot_core (message):
     future.result(10)
 
 def run():
-    try:
-        print("Tring to unload model first.")
-        response = edge_manager_client.UnLoadModel(UnLoadModelRequest(name=model_name))
-    except Exception as e:
-        pass
-
-    while (True):
-        try:
-            response = edge_manager_client.LoadModel(
-                LoadModelRequest(url=model_url, name=model_name))
-            break
-        except Exception as e:
-            print('Model failed to load')
-            sys.exit(-1)
+    # try:
+    #     print("Tring to unload model first.")
+    #     response = edge_manager_client.UnLoadModel(UnLoadModelRequest(name=model_name))
+    # except Exception as e:
+    #     pass
+    #
+    # while (True):
+    #     try:
+    #         response = edge_manager_client.LoadModel(
+    #             LoadModelRequest(url=model_url, name=model_name))
+    #         break
+    #     except Exception as e:
+    #         print('Model failed to load')
+    #         sys.exit(-1)
 
     os.environ["XDG_RUNTIME_DIR"] = "/run/user/0"
     os.environ["QT_QPA_PLATFORM"] = "wayland"
 
     try:
-        if stream_path.isdigit():
-            cap = cv2.VideoCapture(int(stream_path))
-        else:
-            #cap = cv2.VideoCapture(stream_path)
-            cap = cv2.VideoCapture(v4l2_video_pipeline(stream_path))
+        cap = cv2.VideoCapture(v4l2_camera_pipeline(640,480, stream_path))
         ret, captured_frame = cap.read()
     except Exception as e:
         print('Stream failed to open.')
         cap.release()
         print(e)
 
-    window_name = 'full_screen'
-    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN,
-                          cv2.WINDOW_FULLSCREEN)
+    writer = cv2.VideoWriter(video_output_pipeline(),0,20.0, (300, 300))
+
+    # window_name = 'full_screen'
+    # cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+    # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN,
+    #                       cv2.WINDOW_FULLSCREEN)
     #test_img = np.zeros(shape=(1280, 720, 3)).astype('uint8')
     #cv2.imshow(window_name, test_img)
     #cv2.moveWindow(window_name, 200,200)
@@ -275,42 +322,43 @@ def run():
             if not ret:
                 if cap.get(cv2.CAP_PROP_POS_FRAMES) > 200:
                     cap.release()
-                    cap = cv2.VideoCapture(v4l2_video_pipeline(stream_path))
+                    cap = cv2.VideoCapture(v4l2_camera_pipeline(640,480,stream_path))
                 continue
 
-            img = cv2.resize(frame, (300,300))
+            print(frame.shape)
+            img = cv2.resize(frame, (300,300),interpolation=cv2.INTER_NEAREST)
             #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            request = PredictRequest(name=model_name, tensors=[Tensor(tensor_metadata=TensorMetadata(
-                name=tensor_name, data_type=5, shape=tensor_shape), byte_data=img.tobytes())])
-            response = edge_manager_client.Predict(request)
-            inference_result = process_output_tensor(response)
-
-            num = inference_result["number"][0]
-            labels = inference_result["labels"]
-            scores = inference_result["scores"]
-            boxes = inference_result["boxes"]
-            msg = ""
-            for i in range(num):
-                if scores[i] > 0.5:
-                    box = [boxes[i*4], boxes[i*4+1], boxes[i*4+2], boxes[i*4+3]]
-                    x0 = int(box[1] * frame.shape[1])
-                    y0 = int(box[0] * frame.shape[0])
-                    x1 = int(box[3] * frame.shape[1])
-                    y1 = int(box[2] * frame.shape[0])
-
-                    cv2.rectangle(frame, (x0, y0), (x1, y1), (255, 0, 0), 2)
-                    y0 = max(y0-20, 20)
-                    cv2.putText(frame, label2string[labels[i]],
-                                (x0, y0 + 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                1.0, (0, 0, 255), 2)
-                    msg += label2string[labels[i]] + ","
-            if (cnt == 30):
-                publish_results_to_iot_core(msg)
-                cnt = 0
-            cnt += 1
-
-            cv2.imshow(window_name, frame)
+            # request = PredictRequest(name=model_name, tensors=[Tensor(tensor_metadata=TensorMetadata(
+            #     name=tensor_name, data_type=5, shape=tensor_shape), byte_data=img.tobytes())])
+            # response = edge_manager_client.Predict(request)
+            # inference_result = process_output_tensor(response)
+            #
+            # num = inference_result["number"][0]
+            # labels = inference_result["labels"]
+            # scores = inference_result["scores"]
+            # boxes = inference_result["boxes"]
+            # msg = ""
+            # for i in range(num):
+            #     if scores[i] > 0.5:
+            #         box = [boxes[i*4], boxes[i*4+1], boxes[i*4+2], boxes[i*4+3]]
+            #         x0 = int(box[1] * frame.shape[1])
+            #         y0 = int(box[0] * frame.shape[0])
+            #         x1 = int(box[3] * frame.shape[1])
+            #         y1 = int(box[2] * frame.shape[0])
+            #
+            #         cv2.rectangle(frame, (x0, y0), (x1, y1), (255, 0, 0), 2)
+            #         y0 = max(y0-20, 20)
+            #         cv2.putText(frame, label2string[labels[i]],
+            #                     (x0, y0 + 10), cv2.FONT_HERSHEY_SIMPLEX,
+            #                     1.0, (0, 0, 255), 2)
+            #         msg += label2string[labels[i]] + ","
+            # if (cnt == 30):
+            #     publish_results_to_iot_core(msg)
+            #     cnt = 0
+            # cnt += 1
+            writer.write(img)
+            # cv2.imshow(window_name, frame)
             if (cv2.waitKey(1) & 0xFF == ord('q')) or stop_sigterm:
                 break
 
