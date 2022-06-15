@@ -30,7 +30,7 @@ Manifests:
     architecture: "aarch64"
   Lifecycle:
     run:
-      script: "sleep 10 && python3 -u {artifacts:path}/camera_integration_edgemanger_client_gst.py -s {configuration:/streamURL} -c {configuration:/modelComponentName} -m {configuration:/modelName} -q {configuration:/quantization} -a False",
+      script: "sleep 10 && python3 -u {artifacts:path}/camera_integration_edgemanger_client_gst.py -s {configuration:/streamURL} -c {configuration:/modelComponentName} -m {configuration:/modelName} -q {configuration:/quantization} -a False"
       RequiresPrivilege: true
   Artifacts:
   - Uri: "s3://BUCKET_NAME/artifacts/aws.sagemaker.edgeManagerClientCameraIntegration/0.1.0/camera_integration_edgemanger_client_gst.py"
