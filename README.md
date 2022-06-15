@@ -68,17 +68,17 @@ It may take about 15 minutes to conclude.
 
 ## Install the credentials in the device ##
 
-**on your PC**, use `setup_device.sh` script. This will install greengrass on Maivin's filesystem, with its credentials and certificates.
+**on your PC**, use `setup_device_mod.sh` script. This will install greengrass on Maivin's filesystem, with its credentials and certificates.
 
 ```
-$ ./setup_device.sh
+$ ./setup_device_mod.sh
 ```
 
-After this, **on your PC terminal**, use `greengrass.sh` to start execution of greengrass on maivin:
+After this, **on your PC terminal**, use `greengrass_mod.sh` to start execution of greengrass on maivin:
 
 
 ```
-$ ./greengrass.sh
+$ ./greengrass_mod.sh
 ```
 
 This will start Nucleos.
@@ -86,7 +86,7 @@ This will start Nucleos.
 You can execute everything by sending:
 
 ```
-$ ./setup_cloud_service.sh && ./setup_device.sh && ./greengrass.sh 
+$ ./setup_cloud_service.sh && ./setup_device_mod.sh && ./greengrass_mod.sh 
 ```
 
 ## Observing Greengrass logs ##

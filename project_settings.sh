@@ -1,5 +1,5 @@
 AWS_REGION="eu-west-1"
-PROJECT_NAME="ew2022-emirayar-demo-torizon"
+PROJECT_NAME="ew9-emirayar"
 DOCKERHUB_LOGIN="emirayar"
 BOARD_IP="verdin-imx8mp-07011917.local"
 BOARD_PWD="1"
